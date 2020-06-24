@@ -1,0 +1,78 @@
+<body id="container" style="margin: 0; padding: 0;">
+  <canvas id="canvas"></canvas>
+  <script>
+    const container = document.getElementById('container');
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    let width = container.clientWidth;
+    let height = container.clientHeight;
+    const cellHeight = 20;
+    canvas.width = width;
+    canvas.height = height;
+
+    window.addEventListener('resize', () => {
+      width = container.clientWidth;
+      height = container.clientHeight;
+      canvas.width = width;
+      canvas.height = height;
+    });
+
+    let blocks = [];
+
+    class Block {
+      constructor({
+        x = Math.floor(Math.random() * width),
+        y = Math.floor(Math.random() * height),
+        lives = 20,
+        alpha = 1,
+      }) {
+        this.value = Math.floor(Math.random() * 10);
+        this.x = x;
+        this.y = y;
+        this.lives = lives;
+        this.pushed = false;
+        this.alpha = alpha;
+      }
+
+      update() {
+        if (this.y > height) this.y = 0;
+        this.y += cellHeight;
+        this.value = Math.floor(Math.random() * 10);
+        this.lives--;
+
+        if (!this.pushed && this.alpha > 0) {
+          blocks.push(
+            new Block({
+              y: this.y - cellHeight,
+              x: this.x,
+              alpha: this.alpha - 0.05,
+            })
+          );
+          this.pushed = true;
+        }
+      }
+    }
+
+    setInterval(() => {
+      if (blocks.length < 3000)
+        for (let i = 0; i < 3; i++) blocks.push(new Block({}));
+    }, 45);
+
+    //render
+
+    let x1 = 0;
+    setInterval(() => {
+      ctx.fillStyle = 'rgb(0,0,0)';
+      ctx.fillRect(0, 0, width, height);
+      ctx.font = `bold ${cellHeight}px Consolas`;
+
+      blocks.forEach((block) => {
+        ctx.fillStyle = `rgba(0, 200, 0, ${block.alpha})`;
+        ctx.fillText(block.value, block.x, block.y);
+      });
+
+      blocks.forEach((block) => block.update());
+      blocks = blocks.filter((block) => block.lives > 0);
+    }, 50);
+  </script>
+</body>
